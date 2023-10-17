@@ -26,6 +26,13 @@ public class Player : MonoBehaviour
         playerAnim = GetComponent<Animator>();
         playerRB = GetComponent<Rigidbody>();
 
+        // error checking
+        if (!playerMovement || !playerCollision || !playerAnim || !playerRB)
+        {
+            Debug.LogError("Something isn't right here... Please check if all values have been assigned ('Player.cs')");
+        }
+
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     // Update is called once per frame

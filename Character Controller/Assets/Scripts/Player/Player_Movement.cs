@@ -26,8 +26,7 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] internal float _coyoteBuffer = 0.25f;                              // Amount of forgiveness the player should have when leaving the ground too early for a Jump
     private float t_coyoteBufferTimer;
 
-    Vector2 _directionScalar;
-    Vector3 _velocity = Vector3.zero;
+    Vector2 _inputScalar;
 
     // Start is called before the first frame update
     void Awake()
@@ -38,17 +37,18 @@ public class Player_Movement : MonoBehaviour
         // error checking
         if (!playerScript || _accelFactorFromDot == null)
         {
-            Debug.LogError("Something isn't right here... Please check if all values have been assigned");
+            Debug.LogError("Something isn't right here... Please check if all values have been assigned (Player_Movement.cs)");
         }
     }
 
-    // Update is called once per frame
+    // Handles the timers for jumping
     void Update()
     {
         t_coyoteBufferTimer -= Time.deltaTime;
         t_jumpBufferTimer -= Time.deltaTime;
     }
 
+    // Handles the movement based on 
     void FixedUpdate()
     {
         if (playerScript.playerCollision.isGrounded)
@@ -57,17 +57,17 @@ public class Player_Movement : MonoBehaviour
             t_coyoteBufferTimer = _coyoteBuffer;
         }
 
-        // Creates a move scalar vector and then translates target vector to be in-line with where the player is facing
-        Vector3 _movementScalar = new Vector3(_directionScalar.x, playerScript.playerRB.velocity.y, _directionScalar.y);
-        Vector3 _translatedMoveVector = playerScript.transform.TransformDirection(_movementScalar);
+        // Creates Vector3 based on the where the player wants the character to go and translates target vector according to where the player is facing
+        Vector3 _desiredMovement = new Vector3(_inputScalar.x, playerScript.playerRB.velocity.y, _inputScalar.y);
+        Vector3 _translatedMovementVector = playerScript.transform.TransformDirection(_desiredMovement);
 
         // Creates a target Velocity that the player is striving to achieve while maintaining its jumping/falling velocity
-        Vector3 _targetVelocity = _translatedMoveVector * _maxSpeed;
+        Vector3 _targetVelocity = _translatedMovementVector * _maxSpeed;
         _targetVelocity.y = playerScript.playerRB.velocity.y;
 
-        // Gets the direction Vector that the player is currently moving towards and adjusts the acceleration force when changing directions rapidly using a custom Animation Curve
-        Vector3 _playerVelocityDiection = playerScript.playerRB.velocity.normalized;
-        float _velocityDot = Vector3.Dot(_translatedMoveVector, _playerVelocityDiection);
+        // Gets the normalized player velocity vector and adjusts the acceleration force when changing directions rapidly using a custom Animation Curve
+        Vector3 _playerVelocity = playerScript.playerRB.velocity.normalized;
+        float _velocityDot = Vector3.Dot(_translatedMovementVector, _playerVelocity);
         float _adjustedAcceleration = _moveAccel * _accelFactorFromDot.Evaluate(_velocityDot);
 
         // calculates the acceleration needed to move towards the goal speed per physics update
@@ -92,8 +92,8 @@ public class Player_Movement : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
-        //Debug.Log("Moving!");
-        _directionScalar = value.Get<Vector2>();
+        // sets the inputs into a vector to determine left/right and back/forth
+        _inputScalar = value.Get<Vector2>();
     }
 
     public void OnJump(InputValue value)

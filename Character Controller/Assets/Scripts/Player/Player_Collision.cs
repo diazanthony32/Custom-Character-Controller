@@ -25,7 +25,7 @@ public class Player_Collision : MonoBehaviour
         // error checking
         if (!playerScript || !_groundMarker || m_groundLayer < 0)
         {
-            Debug.LogError("Something isn't right here... Please check if all values have been assigned");
+            Debug.LogError("Something isn't right here... Please check if all values have been assigned (Player_Collision.cs)");
         }
     }
 
